@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Inventory List{% endblock %}
+{% block content %}
+<h1>Inventory Items</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Quantity</th>
+      <th>Price</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for item in items %}
+    <tr>
+      <td>{{ item['name'] }}</td>
+      <td>{{ item['quantity'] }}</td>
+      <td>{{ item['price'] }}</td>
+      <td>
+        <a href="/edit/{{ item['id'] }}" class="btn btn-sm btn-primary">Edit</a>
+        <a href="/delete/{{ item['id'] }}" class="btn btn-sm btn-danger">Delete</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
