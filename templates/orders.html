@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<h1>Orders</h1>
+<a href="/orders/add" class="btn btn-primary mb-3">Add Order</a>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Item</th>
+      <th>Quantity</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for order in orders %}
+    <tr>
+      <td>{{ order['id'] }}</td>
+      <td>{{ order['item_name'] }}</td>
+      <td>{{ order['quantity'] }}</td>
+      <td>{{ order['status'] }}</td>
+      <td>
+        {% if order['status'] != 'Shipped' %}
+        <a href="/orders/ship/{{ order['id'] }}" class="btn btn-sm btn-success">Ship</a>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
