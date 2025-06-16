@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Add Order{% endblock %}
+{% block content %}
+<h1>Place Order</h1>
+<form method="post">
+  <div class="mb-3">
+    <label for="item_id" class="form-label">Item</label>
+    <select class="form-select" id="item_id" name="item_id" required>
+      {% for item in items %}
+      <option value="{{ item['id'] }}">{{ item['name'] }} ({{ item['quantity'] }} in stock)</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="quantity" class="form-label">Quantity</label>
+    <input type="number" class="form-control" id="quantity" name="quantity" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Place Order</button>
+</form>
+{% endblock %}

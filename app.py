@@ -18,6 +18,15 @@ def init_db():
         'CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, '
         'name TEXT NOT NULL, quantity INTEGER NOT NULL, price REAL NOT NULL)'
     )
+    conn.execute(
+        'CREATE TABLE IF NOT EXISTS orders ('
+        'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+        'item_id INTEGER NOT NULL,'
+        'quantity INTEGER NOT NULL,'
+        'status TEXT NOT NULL,'
+        'FOREIGN KEY(item_id) REFERENCES items(id)'
+        ')'
+    )
     conn.commit()
     conn.close()
 
@@ -80,6 +89,66 @@ def delete_item(item_id):
     conn.close()
     flash('Item deleted successfully.')
     return redirect(url_for('index'))
+
+
+@app.route('/orders')
+def orders():
+    conn = get_db_connection()
+    orders = conn.execute(
+        'SELECT orders.id, orders.quantity, orders.status, items.name as item_name '
+        'FROM orders JOIN items ON orders.item_id = items.id'
+    ).fetchall()
+    conn.close()
+    return render_template('orders.html', orders=orders)
+
+
+@app.route('/orders/add', methods=['GET', 'POST'])
+def add_order():
+    conn = get_db_connection()
+    items = conn.execute('SELECT * FROM items').fetchall()
+    if request.method == 'POST':
+        item_id = request.form['item_id']
+        quantity = int(request.form['quantity'])
+        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+        if not item:
+            flash('Item not found.')
+            conn.close()
+            return redirect(url_for('add_order'))
+        if quantity > item['quantity']:
+            flash('Insufficient inventory for this order.')
+            conn.close()
+            return redirect(url_for('add_order'))
+        conn.execute(
+            'INSERT INTO orders (item_id, quantity, status) VALUES (?, ?, ?)',
+            (item_id, quantity, 'Processing')
+        )
+        conn.commit()
+        conn.close()
+        flash('Order placed successfully.')
+        return redirect(url_for('orders'))
+    conn.close()
+    return render_template('add_order.html', items=items)
+
+
+@app.route('/orders/ship/<int:order_id>')
+def ship_order(order_id):
+    conn = get_db_connection()
+    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    if not order or order['status'] == 'Shipped':
+        conn.close()
+        flash('Order not found or already shipped.')
+        return redirect(url_for('orders'))
+    item = conn.execute('SELECT * FROM items WHERE id = ?', (order['item_id'],)).fetchone()
+    if order['quantity'] > item['quantity']:
+        conn.close()
+        flash('Not enough inventory to ship this order.')
+        return redirect(url_for('orders'))
+    conn.execute('UPDATE items SET quantity = quantity - ? WHERE id = ?', (order['quantity'], order['item_id']))
+    conn.execute('UPDATE orders SET status = ? WHERE id = ?', ('Shipped', order_id))
+    conn.commit()
+    conn.close()
+    flash('Order shipped.')
+    return redirect(url_for('orders'))
 
 
 if __name__ == '__main__':
