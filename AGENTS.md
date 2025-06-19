@@ -46,7 +46,7 @@ This component orchestrates the entire lifecycle of an order, from placement to 
 -   **Status Updates:** Automatically update the order status and push notifications to the relevant **Retail Store component**.
 -   **Fulfillment Coordination:** Send confirmed order details to the warehouse for picking, packing, and shipping.
 
-### 5. **Customer Management **
+### 5. **retailer Management **
 This component acts as a digital relationship manager for all retail store clients.
 
 **Key Features:**
